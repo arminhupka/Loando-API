@@ -34,6 +34,16 @@ const UserModel = mongoose.Schema(
       type: Number,
       required: true,
     },
+    loans: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Loan',
+      },
+    ],
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

@@ -9,6 +9,7 @@ import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 
 // Routes
 import userRoutes from './routes/userRoutes.js';
+import loanRoutes from './routes/loanRoutes.js';
 
 // Init
 dotenv.config();
@@ -17,6 +18,7 @@ const app = express();
 app.use('/', cors());
 app.use(express.json());
 app.use('/user', userRoutes);
+app.use('/loan', loanRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
