@@ -45,5 +45,20 @@ export const payLoan = asyncHandler(async (req, res) => {
 
   const loan = await Loan.findById(id);
 
+  if (loan.paid >= loan.value) {
+    await Loan.updateOne({ _id: id }, { isActive: false });
+    const closedLoan = await Loan.findById(id);
+    res.status(201).json(closedLoan);
+    return;
+  }
+
   res.status(201).json(loan);
+});
+
+export const loanDetails = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const foundLoan = await Loan.findById(id);
+
+  res.json(foundLoan);
 });
