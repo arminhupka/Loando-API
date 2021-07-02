@@ -11,6 +11,18 @@ const LoanModel = mongoose.Schema(
       type: Number,
       required: true,
     },
+    days: {
+      type: Number,
+      required: true,
+    },
+    paid: {
+      type: Number,
+      default: 0,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcrypt';
 import User from '../models/UserModel.js';
+import Loan from '../models/LoanModel.js';
 import jwtGen from '../lib/jwtGen.js';
 
 export const userRegister = asyncHandler(async (req, res) => {
@@ -27,6 +28,8 @@ export const userRegister = asyncHandler(async (req, res) => {
 
 export const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
+  console.log(email, password);
 
   const user = await User.findOne({ email });
 

@@ -15,8 +15,9 @@ import loanRoutes from './routes/loanRoutes.js';
 dotenv.config();
 const app = express();
 
-app.use('/', cors());
+app.use(cors());
 app.use(express.json());
+app.get('/', (req, res) => res.send('Hello'));
 app.use('/user', userRoutes);
 app.use('/loan', loanRoutes);
 
