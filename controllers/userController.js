@@ -29,8 +29,6 @@ export const userRegister = asyncHandler(async (req, res) => {
 export const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(email, password);
-
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -49,6 +47,26 @@ export const userLogin = asyncHandler(async (req, res) => {
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
+    pesel: user.pesel,
+    address: {
+      street: user.street,
+      city: user.city,
+      postalCode: user.postalCode,
+    },
+    isAdmin: user.isAdmin,
     token: jwtGen(user._id),
+  });
+});
+
+export const updatePassword = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { password } = req.body;
+
+  const hashedPw = await bcrypt.hash(password, 10);
+
+  const user = await User.findByIdAndUpdate(userId, { password: hashedPw });
+
+  res.status(201).json({
+    message: 'Password has been updated',
   });
 });
