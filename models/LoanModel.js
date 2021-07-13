@@ -11,6 +11,10 @@ const LoanModel = mongoose.Schema(
       type: Number,
       required: true,
     },
+    toPay: {
+      type: Number,
+      required: true,
+    },
     days: {
       type: Number,
       required: true,

@@ -14,11 +14,27 @@ export const takeLoan = asyncHandler(async (req, res) => {
   const { value, days } = req.body;
   const userId = req.user._id;
 
+  const userLoans = await User.findById(userId);
+
+  console.log(userLoans.loans);
+
+  if (userLoans.loans.length >= 5) {
+    res.status(400);
+    throw new Error('To many loans');
+  }
+
+  const commission = () => (days * value) / 100;
+
+  const overallPayment = () => value + commission();
+
   const newLoan = await Loan.create({
     user: userId,
     days,
     value,
+    toPay: overallPayment(),
   });
+
+  await User.findByIdAndUpdate(userId, { $push: { loans: newLoan._id } });
 
   res.status(201).json(newLoan);
 });
