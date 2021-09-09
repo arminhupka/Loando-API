@@ -7,9 +7,9 @@ import User from '../models/UserModel.js';
 dotenv.config();
 
 const authMiddleware = expressAsyncHandler(async (req, res, next) => {
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (req.header('x-auth-token')) {
     try {
-      const token = req.headers.authorization.split(' ')[1];
+      const token = req.header('x-auth-token');
       const { id } = await jwt.verify(token, process.env.SECRET_KEY);
       req.user = await User.findById(id).select('-password');
       next();
