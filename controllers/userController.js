@@ -48,11 +48,9 @@ export const userLogin = asyncHandler(async (req, res) => {
     lastName: user.lastName,
     email: user.email,
     pesel: user.pesel,
-    address: {
-      street: user.street,
-      city: user.city,
-      postalCode: user.postalCode,
-    },
+    street: user.street,
+    city: user.city,
+    postalCode: user.postalCode,
     isAdmin: user.isAdmin,
     token: jwtGen(user._id),
   });
@@ -60,13 +58,33 @@ export const userLogin = asyncHandler(async (req, res) => {
 
 export const updatePassword = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const { password } = req.body;
 
-  const hashedPw = await bcrypt.hash(password, 10);
+  const { currentPassword, password: newPassword } = req.body;
 
-  const user = await User.findByIdAndUpdate(userId, { password: hashedPw });
+  // Check current password
+  const user = await User.findById(userId);
 
-  res.status(201).json({
-    message: 'Password has been updated',
-  });
+  console.log(user.password, currentPassword);
+
+  if (await bcrypt.compare(currentPassword, user.password)) {
+    const hashedPw = await bcrypt.hash(newPassword, 10);
+
+    await User.findByIdAndUpdate(userId, { password: hashedPw });
+
+    res.status(201).json({
+      message: 'Password updated',
+    });
+  } else {
+    return res.status(400).json({
+      message: 'Password not match',
+    });
+  }
+});
+
+export const loadUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const user = await User.findByIdAndUpdate(userId);
+
+  res.status(200).json(user);
 });

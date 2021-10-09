@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Loan from '../models/LoanModel.js';
 import User from '../models/UserModel.js';
 
-export const getLoans = asyncHandler(async (req, res) => {
+export const getAllUsersLoans = asyncHandler(async (req, res) => {
   const user = req.user;
 
   const userLoans = await Loan.find({ user: user._id });
@@ -15,8 +15,6 @@ export const takeLoan = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const userLoans = await User.findById(userId);
-
-  console.log(userLoans.loans);
 
   if (userLoans.loans.length >= 5) {
     res.status(400);
@@ -57,7 +55,7 @@ export const payLoan = asyncHandler(async (req, res) => {
     throw new Error(`Value cannot be string`);
   }
 
-  const updatedLoan = await Loan.updateOne({ _id: id }, { $inc: { paid: value } });
+  await Loan.updateOne({ _id: id }, { $inc: { paid: value } });
 
   const loan = await Loan.findById(id);
 
@@ -77,4 +75,12 @@ export const loanDetails = asyncHandler(async (req, res) => {
   const foundLoan = await Loan.findById(id);
 
   res.json(foundLoan);
+});
+
+export const getLoans = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const loans = await Loan.find({ user: userId });
+
+  res.json(loans);
 });
