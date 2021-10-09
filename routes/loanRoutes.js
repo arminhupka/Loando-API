@@ -8,6 +8,6 @@ router.get('/all', authMiddleware, getAllUsersLoans);
 router.post('/new', authMiddleware, takeLoan);
 router.put('/pay', authMiddleware, payLoan);
 router.get('/:id', authMiddleware, loanDetails);
-router.get('/user', authMiddleware, getLoans);
+router.get('/', authMiddleware, getLoans);
 
 export default router;
