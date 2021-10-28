@@ -22,15 +22,31 @@ const UserModel = mongoose.Schema(
       type: Number,
       required: true,
     },
+    id: {
+      type: String,
+      required: true,
+    },
     street: {
       type: String,
       required: true,
+    },
+    houseNumber: {
+      type: Number,
+      required: true,
+    },
+    flatNumber: {
+      type: Number,
+      required: false,
     },
     city: {
       type: String,
       required: true,
     },
     postalCode: {
+      type: Number,
+      required: true,
+    },
+    phone: {
       type: Number,
       required: true,
     },
@@ -43,6 +59,10 @@ const UserModel = mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: false,
+    },
+    accountNumber: {
+      type: String,
+      default: null,
     },
   },
   {

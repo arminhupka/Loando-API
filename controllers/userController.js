@@ -5,7 +5,7 @@ import Loan from '../models/LoanModel.js';
 import jwtGen from '../lib/jwtGen.js';
 
 export const userRegister = asyncHandler(async (req, res) => {
-  const { email, password, firstName, lastName, pesel, street, city, postalCode } = req.body;
+  const { email, password, firstName, lastName, pesel, street, city, postalCode, phone, houseNumber, flatNumber, id } = req.body;
 
   const user = await User.create({
     email,
@@ -16,14 +16,15 @@ export const userRegister = asyncHandler(async (req, res) => {
     street,
     city,
     postalCode,
+    phone,
+    houseNumber,
+    flatNumber,
+    id,
   });
 
-  res.status(201).json({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    token: jwtGen(user._id),
-  });
+  const userData = await User.findById(user._id).select('-password');
+
+  res.status(201).json(userData);
 });
 
 export const userLogin = asyncHandler(async (req, res) => {
@@ -49,8 +50,13 @@ export const userLogin = asyncHandler(async (req, res) => {
     email: user.email,
     pesel: user.pesel,
     street: user.street,
+    houseNumber: user.houseNumber,
+    flatNumber: user.flatNumber,
+    id: user.id,
     city: user.city,
     postalCode: user.postalCode,
+    accountNumber: user.accountNumber,
+    phone: user.phone,
     isAdmin: user.isAdmin,
     token: jwtGen(user._id),
   });
@@ -64,18 +70,16 @@ export const updatePassword = asyncHandler(async (req, res) => {
   // Check current password
   const user = await User.findById(userId);
 
-  console.log(user.password, currentPassword);
-
   if (await bcrypt.compare(currentPassword, user.password)) {
     const hashedPw = await bcrypt.hash(newPassword, 10);
 
     await User.findByIdAndUpdate(userId, { password: hashedPw });
 
-    res.status(201).json({
+    res.status(200).json({
       message: 'Password updated',
     });
   } else {
-    return res.status(400).json({
+    return res.status(403).json({
       message: 'Password not match',
     });
   }
@@ -84,7 +88,18 @@ export const updatePassword = asyncHandler(async (req, res) => {
 export const loadUser = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const user = await User.findByIdAndUpdate(userId);
+  const user = await User.findById(userId).select('-password');
 
   res.status(200).json(user);
+});
+
+export const changeAccountNumber = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { number } = req.body;
+
+  await User.findByIdAndUpdate(userId, { accountNumber: number });
+
+  res.status(200).json({
+    message: 'Account Number Updated',
+  });
 });

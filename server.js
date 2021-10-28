@@ -17,7 +17,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.get('/', (req, res) => res.send('Hello'));
+app.get('/', (req, res) => res.send('Loando API'));
 app.use('/user', userRoutes);
 app.use('/loan', loanRoutes);
 

@@ -3,9 +3,7 @@ import Loan from '../models/LoanModel.js';
 import User from '../models/UserModel.js';
 
 export const getAllUsersLoans = asyncHandler(async (req, res) => {
-  const user = req.user;
-
-  const userLoans = await Loan.find({ user: user._id });
+  const userLoans = await Loan.find();
 
   res.json(userLoans);
 });
@@ -59,7 +57,7 @@ export const payLoan = asyncHandler(async (req, res) => {
 
   const loan = await Loan.findById(id);
 
-  if (loan.paid >= loan.value) {
+  if (loan.paid >= loan.toPay) {
     await Loan.updateOne({ _id: id }, { isActive: false });
     const closedLoan = await Loan.findById(id);
     res.status(201).json(closedLoan);
