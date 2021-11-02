@@ -43,7 +43,7 @@ const UserModel = mongoose.Schema(
       required: true,
     },
     postalCode: {
-      type: Number,
+      type: String,
       required: true,
     },
     phone: {

@@ -7,9 +7,18 @@ import jwtGen from '../lib/jwtGen.js';
 export const userRegister = asyncHandler(async (req, res) => {
   const { email, password, firstName, lastName, pesel, street, city, postalCode, phone, houseNumber, flatNumber, id } = req.body;
 
+  const userEmailExist = await User.findOne({ email });
+  const userPeselExist = await User.findOne({ pesel });
+  const userIdExist = await User.findOne({ id });
+
+  if (userEmailExist || userPeselExist || userIdExist) {
+    res.status(409);
+    throw new Error('User already exist');
+  }
+
   const user = await User.create({
     email,
-    password: await bcrypt.hash(password, 10),
+    password: await bcrypt.hash(password, 12),
     firstName,
     lastName,
     pesel,
