@@ -27,6 +27,9 @@ const LoanModel = mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    payments: {
+      type: Array,
+    },
   },
   {
     timestamps: true,

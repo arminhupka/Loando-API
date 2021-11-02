@@ -97,7 +97,7 @@ export const updatePassword = asyncHandler(async (req, res) => {
 export const loadUser = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const user = await User.findById(userId).select('-password');
+  const user = await User.findById(userId).select('-password -loans -token');
 
   res.status(200).json(user);
 });

@@ -1,6 +1,19 @@
 import asyncHandler from 'express-async-handler';
+import dotenv from 'dotenv';
+
+// Models
 import Loan from '../models/LoanModel.js';
 import User from '../models/UserModel.js';
+
+// Utils
+
+dotenv.config();
+
+import { PayU, Currency } from '@ingameltd/payu';
+
+const payU = new PayU(process.env.PAYU_CLIENT_ID, process.env.PAYU_SECRET, process.env.PAYU_POS_ID, process.env.PAYU_SECOND_KEY, {
+  sandbox: true,
+});
 
 export const getAllUsersLoans = asyncHandler(async (req, res) => {
   const userLoans = await Loan.find();
@@ -37,6 +50,7 @@ export const takeLoan = asyncHandler(async (req, res) => {
 
 export const payLoan = asyncHandler(async (req, res) => {
   const { value, id } = req.body;
+  const userId = req.user._id;
 
   if (!id) {
     res.status(400);
@@ -53,18 +67,67 @@ export const payLoan = asyncHandler(async (req, res) => {
     throw new Error(`Value cannot be string`);
   }
 
-  await Loan.updateOne({ _id: id }, { $inc: { paid: value } });
+  const user = await User.findById(userId);
+
+  const order = await payU.createOrder({
+    notifyUrl: `http://c32f-2a02-a311-233f-4200-7109-2385-3556-ad8d.eu.ngrok.io/loan/pay/notification/${id}`,
+    customerIp: '127.0.0.1',
+    continueUrl: `http://localhost:3000/konto/status/${id}`,
+    description: `Spłata pożyczki #${id}`,
+    currencyCode: Currency.PLN,
+    totalAmount: value * 100,
+    buyer: {
+      email: `${user.email}`,
+    },
+    products: [{ name: `Spłata pożyczki #${id}`, quantity: 1, unitPrice: value * 100 }],
+  });
+
+  res.status(200).json(order);
+
+  // await Loan.updateOne({ _id: id }, { $inc: { paid: value } });
+
+  // const loan = await Loan.findById(id);
+
+  // if (loan.paid >= loan.toPay) {
+  //   await Loan.updateOne({ _id: id }, { isActive: false });
+  //   const closedLoan = await Loan.findById(id);
+  //   res.status(201).json(closedLoan);
+  //   return;
+  // }
+  //
+  // res.status(201).json(loan);
+});
+
+export const getPayNotify = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const notif = req.body;
+
+  console.log(`LOAN ${id} PAYMENT STATUS: ${notif.order.status}`);
+
+  if (notif.order.status === 'COMPLETED') {
+    await Loan.updateOne({ _id: id }, { $inc: { paid: notif.order.totalAmount / 100 }, $push: { payments: notif.order } });
+
+    const loan = await Loan.findById(id);
+
+    if (loan.paid >= loan.toPay) {
+      await Loan.updateOne({ _id: id }, { isActive: false });
+      return;
+    }
+  }
+
+  await Loan.updateOne({ _id: id }, { $push: { payments: notif.order } });
+  console.log(`LOAN #${id} UPDATED`);
+
+  res.status(200).json('Notification');
+});
+
+export const getPaymentStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
   const loan = await Loan.findById(id);
 
-  if (loan.paid >= loan.toPay) {
-    await Loan.updateOne({ _id: id }, { isActive: false });
-    const closedLoan = await Loan.findById(id);
-    res.status(201).json(closedLoan);
-    return;
-  }
-
-  res.status(201).json(loan);
+  res.json(loan.payments[loan.payments.length - 1].status);
 });
 
 export const loanDetails = asyncHandler(async (req, res) => {
