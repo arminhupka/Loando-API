@@ -25,9 +25,11 @@ export const takeLoan = asyncHandler(async (req, res) => {
   const { value, days } = req.body;
   const userId = req.user._id;
 
-  const userLoans = await User.findById(userId);
+  const { loans } = await User.findById(userId).populate('loans');
 
-  if (userLoans.loans.length >= 5) {
+  const activeLoans = loans.filter((loan) => loan.isActive === true);
+
+  if (activeLoans.length >= 3) {
     res.status(400);
     throw new Error('To many loans');
   }
@@ -45,7 +47,7 @@ export const takeLoan = asyncHandler(async (req, res) => {
 
   await User.findByIdAndUpdate(userId, { $push: { loans: newLoan._id } });
 
-  res.status(201).json(newLoan);
+  res.status(201).json('xd');
 });
 
 export const payLoan = asyncHandler(async (req, res) => {
