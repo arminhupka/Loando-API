@@ -70,9 +70,9 @@ export const payLoan = asyncHandler(async (req, res) => {
   const user = await User.findById(userId);
 
   const order = await payU.createOrder({
-    notifyUrl: `http://c32f-2a02-a311-233f-4200-7109-2385-3556-ad8d.eu.ngrok.io/loan/pay/notification/${id}`,
+    notifyUrl: `${process.env.HOST}/loan/pay/notification/${id}`,
     customerIp: '127.0.0.1',
-    continueUrl: `http://localhost:3000/konto/status/${id}`,
+    continueUrl: `${process.env.FRONTEND_DOMAIN}/konto/status/${id}`,
     description: `Spłata pożyczki #${id}`,
     currencyCode: Currency.PLN,
     totalAmount: value * 100,
