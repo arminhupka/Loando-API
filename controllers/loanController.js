@@ -6,6 +6,7 @@ import Loan from '../models/LoanModel.js';
 import User from '../models/UserModel.js';
 
 // Utils
+import loanCalculator from '../lib/loanCalculator.js';
 
 dotenv.config();
 
@@ -147,3 +148,11 @@ export const getLoans = asyncHandler(async (req, res) => {
 
   res.json(loans);
 });
+
+export const calulate = (req, res) => {
+  const { amount, interest, period, commission, others } = req.body;
+
+  const calcValues = loanCalculator(amount, interest, period, commission, others);
+
+  res.json(calcValues);
+};
