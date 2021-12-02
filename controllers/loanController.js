@@ -35,15 +35,16 @@ export const takeLoan = asyncHandler(async (req, res) => {
     throw new Error('To many loans');
   }
 
-  const commission = () => (days * value) / 100;
-
-  const overallPayment = () => value + commission();
+  const calcValues = loanCalculator(value, process.env.LOAN_INTEREST, process.env.LOAN_COMMISSION, 0, days);
 
   const newLoan = await Loan.create({
     user: userId,
     days,
-    value,
-    toPay: overallPayment(),
+    value: value,
+    commission: calcValues.commissionAmount,
+    interest: calcValues.capitalInterest,
+    rrso: calcValues.rrso,
+    toPay: calcValues.toRepaid,
   });
 
   await User.findByIdAndUpdate(userId, { $push: { loans: newLoan._id } });
@@ -86,19 +87,6 @@ export const payLoan = asyncHandler(async (req, res) => {
   });
 
   res.status(200).json(order);
-
-  // await Loan.updateOne({ _id: id }, { $inc: { paid: value } });
-
-  // const loan = await Loan.findById(id);
-
-  // if (loan.paid >= loan.toPay) {
-  //   await Loan.updateOne({ _id: id }, { isActive: false });
-  //   const closedLoan = await Loan.findById(id);
-  //   res.status(201).json(closedLoan);
-  //   return;
-  // }
-  //
-  // res.status(201).json(loan);
 });
 
 export const getPayNotify = asyncHandler(async (req, res) => {
@@ -150,9 +138,11 @@ export const getLoans = asyncHandler(async (req, res) => {
 });
 
 export const calulate = (req, res) => {
-  const { amount, interest, period, commission, others } = req.body;
+  const { amount, period } = req.body;
 
-  const calcValues = loanCalculator(amount, interest, period, commission, others);
+  const calcValues = loanCalculator(amount, process.env.LOAN_INTEREST, process.env.LOAN_COMMISSION, 0, period);
+
+  console.log(calcValues);
 
   res.json(calcValues);
 };

@@ -23,6 +23,17 @@ const LoanModel = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    commission: {
+      type: Number,
+    },
+    interest: {
+      type: Number,
+      required: true,
+    },
+    rrso: {
+      type: Number,
+      required: true,
+    },
     isActive: {
       type: Boolean,
       default: true,
